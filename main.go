@@ -1,21 +1,32 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"image/color"
 	"log"
 	"math"
 	"time"
 
-	"github.com/artem-shestakov/Snake-Go.git/models"
+	"github.com/artem-shestakov/Snake-Go/models"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
+type Mode int
+
 const (
-	screenWidth  = 600
-	screenHeight = 600
-	headSize     = 20
-	foodRadius   = 10
+	ModeGame Mode = iota
+	ModeGameOver
+
+	screenWidth   = 600
+	screenHeight  = 600
+	headSize      = 20
+	foodRadius    = 10
+	fontSize      = 24
+	titleFontSize = fontSize * 1.5
 )
 
 var (
@@ -26,9 +37,12 @@ var (
 	simpleShader *ebiten.Shader
 	snake        = new(models.Snake)
 	foods        []models.Food
+
+	arcadeFaceSource *text.GoTextFaceSource
 )
 
 type Game struct {
+	mode        Mode
 	pressedKeys []ebiten.Key
 	score       int
 }
@@ -47,59 +61,73 @@ func init() {
 		panic(err)
 	}
 
+	s, err := text.NewGoTextFaceSource(bytes.NewReader(fonts.PressStart2P_ttf))
+	if err != nil {
+		log.Fatal(err)
+	}
+	arcadeFaceSource = s
+
 }
 
 func (g *Game) Update() error {
-	if len(foods) < 1 {
-		food := models.NewFood(simpleShader, foodRadius, screenWidth, screenHeight)
-		foods = append(foods, *food)
-	}
-
-	for foodIndex, food := range foods {
-		if snake.IsHitFood(&food) {
-			foods = append(foods[:foodIndex], foods[foodIndex+1:]...)
-			g.score += 1
-			snake.Grow()
-			fmt.Print(snake.Bodies)
+	switch g.mode {
+	case ModeGame:
+		if len(foods) < 1 {
+			food := models.NewFood(simpleShader, foodRadius, screenWidth, screenHeight)
+			foods = append(foods, *food)
 		}
-	}
 
-	g.pressedKeys = inpututil.AppendPressedKeys(g.pressedKeys[:0])
-
-	for _, key := range g.pressedKeys {
-		switch key.String() {
-		case "S":
-			if direction != "up" {
-				shakeMovementPositionX = 0
-				shakeMovementPositionY = headSize
-				direction = "down"
-			}
-		case "W":
-			if direction != "down" {
-				shakeMovementPositionX = 0
-				shakeMovementPositionY = -headSize
-				direction = "up"
-			}
-		case "D":
-			if direction != "left" {
-				shakeMovementPositionX = headSize
-				shakeMovementPositionY = 0
-				direction = "right"
-			}
-		case "A":
-			if direction != "right" {
-				shakeMovementPositionX = -headSize
-				shakeMovementPositionY = 0
-				direction = "left"
-
+		for foodIndex, food := range foods {
+			if snake.IsHitFood(&food) {
+				foods = append(foods[:foodIndex], foods[foodIndex+1:]...)
+				g.score += 1
+				snake.Grow()
+				fmt.Print(snake.Bodies)
 			}
 		}
-	}
-	snake.MoveBody()
-	snake.X += int(math.Round(shakeMovementPositionX))
-	snake.Y += int(math.Round(shakeMovementPositionY))
 
-	time.Sleep(150 * time.Millisecond)
+		g.pressedKeys = inpututil.AppendPressedKeys(g.pressedKeys[:0])
+
+		for _, key := range g.pressedKeys {
+			switch key.String() {
+			case "S":
+				if direction != "up" {
+					shakeMovementPositionX = 0
+					shakeMovementPositionY = headSize
+					direction = "down"
+				}
+			case "W":
+				if direction != "down" {
+					shakeMovementPositionX = 0
+					shakeMovementPositionY = -headSize
+					direction = "up"
+				}
+			case "D":
+				if direction != "left" {
+					shakeMovementPositionX = headSize
+					shakeMovementPositionY = 0
+					direction = "right"
+				}
+			case "A":
+				if direction != "right" {
+					shakeMovementPositionX = -headSize
+					shakeMovementPositionY = 0
+					direction = "left"
+
+				}
+			}
+		}
+		snake.MoveBody()
+		snake.X += int(math.Round(shakeMovementPositionX))
+		snake.Y += int(math.Round(shakeMovementPositionY))
+		if snake.BoardCollision(screenWidth, screenHeight) {
+			g.mode = ModeGameOver
+		}
+		time.Sleep(150 * time.Millisecond)
+
+	case ModeGameOver:
+
+	}
 	return nil
 }
 
@@ -114,6 +142,33 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for _, food := range foods {
 		food.DrawFood(screen)
 	}
+	// var titleTexts string
+	var texts string
+	switch g.mode {
+	case ModeGameOver:
+		texts = "\nGAME OVER!"
+	}
+
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(screenWidth/2, 3*titleFontSize)
+	op.ColorScale.ScaleWithColor(color.White)
+	op.LineSpacingInPixels = fontSize
+	op.PrimaryAlign = text.AlignCenter
+	text.Draw(screen, texts, &text.GoTextFace{
+		Source: arcadeFaceSource,
+		Size:   fontSize,
+	}, op)
+
+	// var titleTexts string
+	// var texts string
+	// switch g.mode {
+	// case ModeTitle:
+	// 	titleTexts = "FLAPPY GOPHER"
+	// 	texts = "\n\n\n\n\n\nPRESS SPACE KEY\n\nOR A/B BUTTON\n\nOR TOUCH SCREEN"
+	// case ModeGameOver:
+	// 	texts = "\nGAME OVER!"
+	// }
+
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
@@ -75,6 +77,14 @@ func (s *Snake) MoveBody() {
 
 func (s *Snake) IsHitFood(food *Food) bool {
 	if (s.X-food.x <= s.Size/2+food.Radius && s.X-food.x >= 0 || food.x-s.X <= s.Size/2+food.Radius && food.x-s.X >= 0) && (s.Y-food.y <= s.Size/2+food.Radius && s.Y-food.y >= 0 || food.y-s.Y <= s.Size/2+food.Radius && food.y-s.Y >= 0) {
+		return true
+	}
+	return false
+}
+
+func (s *Snake) BoardCollision(screenWidth, screenHeight int) bool {
+	if s.X-s.Size <= 0 || s.X+s.Size >= screenWidth || s.Y-s.Size <= 0 || s.Y+s.Size >= screenHeight {
+		fmt.Println("Game Over")
 		return true
 	}
 	return false
