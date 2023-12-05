@@ -1,7 +1,6 @@
 package models
 
 import (
-	"image/color"
 	"math"
 	"math/rand"
 
@@ -31,7 +30,7 @@ func (f *Food) setCoordinate(screenWidth, screenHeight int) {
 	f.y = rand.Intn(screenHeight-f.Radius+1) + f.Radius
 }
 
-func (f *Food) DrawFood(screen *ebiten.Image, clr color.Color) {
+func (f *Food) DrawFood(screen *ebiten.Image) {
 	var path vector.Path
 
 	// Draw square
