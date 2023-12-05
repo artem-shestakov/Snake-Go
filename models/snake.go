@@ -71,13 +71,6 @@ func (s *Snake) MoveBody() {
 		s.Bodies[0].X = s.X
 		s.Bodies[0].Y = s.Y
 	}
-	// if len(s.Bodies) > 0 {
-	// 	tmp := s.Bodies
-	// 	s.Bodies = []Body{{X: s.X, Y: s.Y}}
-	// 	s.Bodies = append(s.Bodies, tmp[:1]...)
-	// 	// s.Bodies = s.Bodies[:len(s.Bodies)]
-	// 	// s.Bodies = append(s.Bodies, Body{X: s.X, Y})
-	// }
 }
 
 func (s *Snake) IsHitFood(food *Food) bool {

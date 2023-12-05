@@ -104,9 +104,11 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	snake.Draw(screen, snake.X, snake.Y, []float32{0xf0 / float32(0xff), 0xc8 / float32(0xff), 0x00 / float32(0xff)})
+	snake.Draw(screen, snake.X, snake.Y,
+		[]float32{0xf0 / float32(0xff), 0xc8 / float32(0xff), 0x00 / float32(0xff)})
 	for _, body := range snake.Bodies {
-		snake.Draw(screen, body.X, body.Y, []float32{0x43 / float32(0xff), 0xff / float32(0xff), 0x64 / float32(0xff)})
+		snake.Draw(screen, body.X, body.Y,
+			[]float32{0x43 / float32(0xff), 0xff / float32(0xff), 0x64 / float32(0xff)})
 	}
 
 	for _, food := range foods {
