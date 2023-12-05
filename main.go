@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 	"math"
@@ -54,7 +53,6 @@ func init() {
 }
 
 func (g *Game) Update() error {
-	fmt.Println(g.score)
 	if len(foods) < 1 {
 		food := models.NewFood(simpleShader, foodRadius, screenWidth, screenHeight)
 		foods = append(foods, *food)
@@ -109,7 +107,7 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	screen.Fill(color.RGBA{60, 179, 113, 255})
+	screen.Fill(color.RGBA{0, 0, 0, 255})
 	purpleCol := color.RGBA{255, 0, 255, 255}
 	snake.DrawHead(screen, purpleCol)
 	for _, food := range foods {
