@@ -19,12 +19,9 @@ const (
 )
 
 var (
-	// shakeHeadPositionX     = float64(screenWidth) / 2
-	// shakeHeadPositionY     = float64(screenHeight) / 2
 	shakeMovementPositionX = float64(0)
 	shakeMovementPositionY = float64(0)
-	// prevUpdateTime         = time.Now()
-	direction = ""
+	direction              = ""
 
 	simpleShader *ebiten.Shader
 	snake        = new(models.Snake)
