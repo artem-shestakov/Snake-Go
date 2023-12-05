@@ -26,8 +26,9 @@ func NewFood(simpleShader *ebiten.Shader, radius, screenWidth, screenHeight int)
 }
 
 func (f *Food) setCoordinate(screenWidth, screenHeight int) {
-	f.x = rand.Intn(screenWidth - f.Radius)
-	f.y = rand.Intn(screenHeight - f.Radius)
+
+	f.x = rand.Intn(screenWidth-f.Radius+1) + f.Radius
+	f.y = rand.Intn(screenHeight-f.Radius+1) + f.Radius
 }
 
 func (f *Food) DrawFood(screen *ebiten.Image, clr color.Color) {

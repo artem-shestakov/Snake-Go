@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	screenWidth  = 600
+	screenWidth  = 800
 	screenHeight = 600
 	headSize     = 20
 	foodRadius   = 10
@@ -34,6 +34,7 @@ var (
 
 type Game struct {
 	pressedKeys []ebiten.Key
+	score       int
 }
 
 func init() {
@@ -53,13 +54,17 @@ func init() {
 }
 
 func (g *Game) Update() error {
+	fmt.Println(g.score)
 	if len(foods) < 1 {
 		food := models.NewFood(simpleShader, foodRadius, screenWidth, screenHeight)
 		foods = append(foods, *food)
 	}
 
-	for _, f := range foods {
-		fmt.Println(snake.IsHitFood(&f))
+	for foodIndex, food := range foods {
+		if snake.IsHitFood(&food) {
+			foods = append(foods[:foodIndex], foods[foodIndex+1:]...)
+			g.score += 1
+		}
 	}
 
 	timeDelta := float64(time.Since(prevUpdateTime))
@@ -68,25 +73,25 @@ func (g *Game) Update() error {
 
 	for _, key := range g.pressedKeys {
 		switch key.String() {
-		case "ArrowDown":
+		case "S":
 			if direction != "up" {
 				shakeMovementPositionX = 0
 				shakeMovementPositionY = 0.0000001
 				direction = "down"
 			}
-		case "ArrowUp":
+		case "W":
 			if direction != "down" {
 				shakeMovementPositionX = 0
 				shakeMovementPositionY = -0.0000001
 				direction = "up"
 			}
-		case "ArrowRight":
+		case "D":
 			if direction != "left" {
 				shakeMovementPositionX = 0.0000001
 				shakeMovementPositionY = 0
 				direction = "right"
 			}
-		case "ArrowLeft":
+		case "A":
 			if direction != "right" {
 				shakeMovementPositionX = -0.0000001
 				shakeMovementPositionY = 0
@@ -106,8 +111,6 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{60, 179, 113, 255})
 	purpleCol := color.RGBA{255, 0, 255, 255}
-	// x := int(math.Round(shakeHeadPositionX))
-	// y := int(math.Round(shakeHeadPositionY))
 	snake.DrawHead(screen, purpleCol)
 	for _, food := range foods {
 		food.DrawFood(screen, purpleCol)
