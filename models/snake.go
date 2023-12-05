@@ -9,16 +9,24 @@ import (
 
 type Snake struct {
 	SimpleShader *ebiten.Shader
+	X            int
+	Y            int
+	HeadSize     int
 }
 
-func (s *Snake) DrawHead(screen *ebiten.Image, x, y, size int, clr color.Color) {
+func (s *Snake) SetHeadPosition(x, y int) {
+	s.X = x
+	s.Y = y
+}
+
+func (s *Snake) DrawHead(screen *ebiten.Image, clr color.Color) {
 	var path vector.Path
 
 	// Draw square
-	path.MoveTo(float32(x), float32(y))
-	path.LineTo(float32(x+size), float32(y))
-	path.LineTo(float32(x+size), float32(y+size))
-	path.LineTo(float32(x), float32(y+size))
+	path.MoveTo(float32(s.X-s.HeadSize/2), float32(s.Y-s.HeadSize/2))
+	path.LineTo(float32(s.X+s.HeadSize/2), float32(s.Y-s.HeadSize/2))
+	path.LineTo(float32(s.X+s.HeadSize/2), float32(s.Y+s.HeadSize/2))
+	path.LineTo(float32(s.X-s.HeadSize/2), float32(s.Y+s.HeadSize/2))
 	path.Close()
 
 	vertices, indices := path.AppendVerticesAndIndicesForFilling(nil, nil)
@@ -39,4 +47,11 @@ func (s *Snake) DrawHead(screen *ebiten.Image, x, y, size int, clr color.Color) 
 	screen.DrawTrianglesShader(vertices, indices, s.SimpleShader, &ebiten.DrawTrianglesShaderOptions{
 		FillRule: ebiten.EvenOdd,
 	})
+}
+
+func (s *Snake) IsHitFood(food *Food) bool {
+	if (s.X-food.x <= s.HeadSize/2+food.Radius && s.X-food.x >= 0 || food.x-s.X <= s.HeadSize/2+food.Radius && food.x-s.X >= 0) && (s.Y-food.y <= s.HeadSize/2+food.Radius && s.Y-food.y >= 0 || food.y-s.Y <= s.HeadSize/2+food.Radius && food.y-s.Y >= 0) {
+		return true
+	}
+	return false
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 	"math"
@@ -19,8 +20,8 @@ const (
 )
 
 var (
-	shakeHeadPositionX     = float64(screenWidth) / 2
-	shakeHeadPositionY     = float64(screenHeight) / 2
+	// shakeHeadPositionX     = float64(screenWidth) / 2
+	// shakeHeadPositionY     = float64(screenHeight) / 2
 	shakeMovementPositionX = float64(0)
 	shakeMovementPositionY = float64(0)
 	prevUpdateTime         = time.Now()
@@ -57,6 +58,10 @@ func (g *Game) Update() error {
 		foods = append(foods, *food)
 	}
 
+	for _, f := range foods {
+		fmt.Println(snake.IsHitFood(&f))
+	}
+
 	timeDelta := float64(time.Since(prevUpdateTime))
 
 	g.pressedKeys = inpututil.AppendPressedKeys(g.pressedKeys[:0])
@@ -91,8 +96,8 @@ func (g *Game) Update() error {
 		}
 	}
 
-	shakeHeadPositionX += shakeMovementPositionX * timeDelta
-	shakeHeadPositionY += shakeMovementPositionY * timeDelta
+	snake.X += int(math.Round(shakeMovementPositionX * timeDelta))
+	snake.Y += int(math.Round(shakeMovementPositionY * timeDelta))
 
 	prevUpdateTime = time.Now()
 	return nil
@@ -101,9 +106,9 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{60, 179, 113, 255})
 	purpleCol := color.RGBA{255, 0, 255, 255}
-	x := int(math.Round(shakeHeadPositionX))
-	y := int(math.Round(shakeHeadPositionY))
-	snake.DrawHead(screen, x, y, headSize, purpleCol)
+	// x := int(math.Round(shakeHeadPositionX))
+	// y := int(math.Round(shakeHeadPositionY))
+	snake.DrawHead(screen, purpleCol)
 	for _, food := range foods {
 		food.DrawFood(screen, purpleCol)
 	}
@@ -115,9 +120,9 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func main() {
 	snake.SimpleShader = simpleShader
-	// food.Radius = foodRadius
-	// food.SimpleShader = simpleShader
-	// food.SetCoordinate(screenWidth, screenHeight)
+	snake.X = screenWidth / 2
+	snake.Y = screenHeight / 2
+	snake.HeadSize = 20
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
 	ebiten.SetWindowTitle("Snake Game")
 	if err := ebiten.RunGame(&Game{}); err != nil {

@@ -11,8 +11,8 @@ import (
 
 type Food struct {
 	SimpleShader *ebiten.Shader
-	x            float32
-	y            float32
+	x            int
+	y            int
 	Radius       int
 }
 
@@ -26,8 +26,8 @@ func NewFood(simpleShader *ebiten.Shader, radius, screenWidth, screenHeight int)
 }
 
 func (f *Food) setCoordinate(screenWidth, screenHeight int) {
-	f.x = float32(rand.Intn(screenWidth - f.Radius))
-	f.y = float32(rand.Intn(screenHeight - f.Radius))
+	f.x = rand.Intn(screenWidth - f.Radius)
+	f.y = rand.Intn(screenHeight - f.Radius)
 }
 
 func (f *Food) DrawFood(screen *ebiten.Image, clr color.Color) {
