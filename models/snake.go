@@ -39,7 +39,6 @@ func (s *Snake) Draw(screen *ebiten.Image, x, y int, clr []float32) {
 	greenScaled := clr[1]
 	blueScaled := clr[2]
 	alphaScaled := 0.85
-
 	for i := range vertices {
 		v := &vertices[i]
 		v.ColorR = redScaled
@@ -53,12 +52,9 @@ func (s *Snake) Draw(screen *ebiten.Image, x, y int, clr []float32) {
 	})
 }
 
+// Key controll
 func (s *Snake) Grow() {
 	var body Body
-	// body := Body{
-	// 	X: s.X,
-	// 	Y: s.Y,
-	// }
 	for i := 1; i <= 3; i++ {
 		switch s.Direction {
 		case "up":
@@ -114,34 +110,17 @@ func (s *Snake) BoardCollision(screenWidth, screenHeight int) bool {
 }
 
 func (s *Snake) BodyCollision() bool {
-	// var headX1, headX2, headY1, headY2 int
-	// switch s.Direction {
-	// case "up":
-	// 	headX1 = s.X - s.Size/2
-	// 	headX2 = s.X + s.Size/2
-	// 	headY1 = s.Y - s.Size/2
-	// 	headY2 = headY1
-	// case "down":
-	// 	headX1 = s.X + s.Size/2
-	// 	headX2 = s.X - s.Size/2
-	// 	headY1 = s.Y + s.Size/2
-	// 	headY2 = headY1
-	// case "left":
-	// 	headX1 = s.X - s.Size/2
-	// 	headX2 = headX1
-	// 	headY1 = s.Y + s.Size/2
-	// 	headY2 = s.Y - s.Size/2
-	// case "right":
-	// 	headX1 = s.X + s.Size/2
-	// 	headX2 = headX1
-	// 	headY1 = s.Y - s.Size/2
-	// 	headY2 = s.Y + s.Size/2
-	// }
 	for _, body := range s.Bodies {
-		// if s.Direction == "up" && (body.X+s.Size/2 > headX1 || body.X-s.Size/2 < headX2) && (body.Y+s.Size/2 > headY1 || body.Y-s.Size/2 < headY2) {
-		// 	return true
-		// }
 		if s.Direction == "up" && ((s.X-body.X <= s.Size && s.X-body.X >= 0) || (body.X-s.X <= s.Size && body.X-s.X >= 0)) && (s.Y-body.Y <= s.Size && s.Y-body.Y > 0) {
+			return true
+		}
+		if s.Direction == "down" && ((s.X-body.X <= s.Size && s.X-body.X >= 0) || (body.X-s.X <= s.Size && body.X-s.X >= 0)) && (body.Y-s.Y <= s.Size && body.Y-s.Y > 0) {
+			return true
+		}
+		if s.Direction == "left" && ((s.Y-body.Y <= s.Size && s.Y-body.Y >= 0) || (body.Y-s.Y <= s.Size && body.Y-s.Y >= 0)) && (s.X-body.X <= s.Size && s.X-body.X > 0) {
+			return true
+		}
+		if s.Direction == "right" && ((s.Y-body.Y <= s.Size && s.Y-body.Y >= 0) || (body.Y-s.Y <= s.Size && body.Y-s.Y >= 0)) && (body.X-s.X <= s.Size && body.X-s.X > 0) {
 			return true
 		}
 	}

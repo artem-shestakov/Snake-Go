@@ -19,11 +19,11 @@ const (
 	ModeGame Mode = iota
 	ModeGameOver
 
-	screenWidth   = 400
-	screenHeight  = 400
-	headSize      = 20
-	foodRadius    = 10
-	fontSize      = 24
+	screenWidth   = 600
+	screenHeight  = 600
+	headSize      = 40
+	foodRadius    = 17
+	fontSize      = 34
 	titleFontSize = fontSize * 1.5
 )
 
@@ -144,7 +144,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for _, food := range foods {
 		food.DrawFood(screen)
 	}
-	// var titleTexts string
+
 	var texts string
 	switch g.mode {
 	case ModeGameOver:
