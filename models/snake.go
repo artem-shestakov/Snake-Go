@@ -112,3 +112,38 @@ func (s *Snake) BoardCollision(screenWidth, screenHeight int) bool {
 	}
 	return false
 }
+
+func (s *Snake) BodyCollision() bool {
+	// var headX1, headX2, headY1, headY2 int
+	// switch s.Direction {
+	// case "up":
+	// 	headX1 = s.X - s.Size/2
+	// 	headX2 = s.X + s.Size/2
+	// 	headY1 = s.Y - s.Size/2
+	// 	headY2 = headY1
+	// case "down":
+	// 	headX1 = s.X + s.Size/2
+	// 	headX2 = s.X - s.Size/2
+	// 	headY1 = s.Y + s.Size/2
+	// 	headY2 = headY1
+	// case "left":
+	// 	headX1 = s.X - s.Size/2
+	// 	headX2 = headX1
+	// 	headY1 = s.Y + s.Size/2
+	// 	headY2 = s.Y - s.Size/2
+	// case "right":
+	// 	headX1 = s.X + s.Size/2
+	// 	headX2 = headX1
+	// 	headY1 = s.Y - s.Size/2
+	// 	headY2 = s.Y + s.Size/2
+	// }
+	for _, body := range s.Bodies {
+		// if s.Direction == "up" && (body.X+s.Size/2 > headX1 || body.X-s.Size/2 < headX2) && (body.Y+s.Size/2 > headY1 || body.Y-s.Size/2 < headY2) {
+		// 	return true
+		// }
+		if s.Direction == "up" && ((s.X-body.X <= s.Size && s.X-body.X >= 0) || (body.X-s.X <= s.Size && body.X-s.X >= 0)) && (s.Y-body.Y <= s.Size && s.Y-body.Y > 0) {
+			return true
+		}
+	}
+	return false
+}

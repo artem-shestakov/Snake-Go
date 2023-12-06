@@ -120,7 +120,11 @@ func (g *Game) Update() error {
 		snake.MoveBody()
 		snake.X += shakeMovementPositionX
 		snake.Y += shakeMovementPositionY
+
 		if snake.BoardCollision(screenWidth, screenHeight) {
+			g.mode = ModeGameOver
+		}
+		if snake.BodyCollision() {
 			g.mode = ModeGameOver
 		}
 	case ModeGameOver:
