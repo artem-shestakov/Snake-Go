@@ -2,11 +2,8 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"image/color"
 	"log"
-	"math"
-	"time"
 
 	"github.com/artem-shestakov/Snake-Go/models"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -21,8 +18,8 @@ const (
 	ModeGame Mode = iota
 	ModeGameOver
 
-	screenWidth   = 600
-	screenHeight  = 600
+	screenWidth   = 400
+	screenHeight  = 400
 	headSize      = 20
 	foodRadius    = 10
 	fontSize      = 24
@@ -30,8 +27,8 @@ const (
 )
 
 var (
-	shakeMovementPositionX = float64(0)
-	shakeMovementPositionY = float64(0)
+	shakeMovementPositionX = 0
+	shakeMovementPositionY = 0
 	direction              = ""
 
 	simpleShader *ebiten.Shader
@@ -45,6 +42,7 @@ type Game struct {
 	mode        Mode
 	pressedKeys []ebiten.Key
 	score       int
+	speed       int
 }
 
 func init() {
@@ -82,49 +80,48 @@ func (g *Game) Update() error {
 				foods = append(foods[:foodIndex], foods[foodIndex+1:]...)
 				g.score += 1
 				snake.Grow()
-				fmt.Print(snake.Bodies)
 			}
 		}
 
 		g.pressedKeys = inpututil.AppendPressedKeys(g.pressedKeys[:0])
-
 		for _, key := range g.pressedKeys {
 			switch key.String() {
-			case "S":
+			case "ArrowDown":
 				if direction != "up" {
 					shakeMovementPositionX = 0
-					shakeMovementPositionY = headSize
+					shakeMovementPositionY = g.speed
 					direction = "down"
+					snake.Direction = "down"
 				}
-			case "W":
+			case "ArrowUp":
 				if direction != "down" {
 					shakeMovementPositionX = 0
-					shakeMovementPositionY = -headSize
+					shakeMovementPositionY = -g.speed
 					direction = "up"
+					snake.Direction = "up"
 				}
-			case "D":
+			case "ArrowRight":
 				if direction != "left" {
-					shakeMovementPositionX = headSize
+					shakeMovementPositionX = g.speed
 					shakeMovementPositionY = 0
 					direction = "right"
+					snake.Direction = "right"
 				}
-			case "A":
+			case "ArrowLeft":
 				if direction != "right" {
-					shakeMovementPositionX = -headSize
+					shakeMovementPositionX = -g.speed
 					shakeMovementPositionY = 0
 					direction = "left"
-
+					snake.Direction = "left"
 				}
 			}
 		}
 		snake.MoveBody()
-		snake.X += int(math.Round(shakeMovementPositionX))
-		snake.Y += int(math.Round(shakeMovementPositionY))
+		snake.X += shakeMovementPositionX
+		snake.Y += shakeMovementPositionY
 		if snake.BoardCollision(screenWidth, screenHeight) {
 			g.mode = ModeGameOver
 		}
-		time.Sleep(150 * time.Millisecond)
-
 	case ModeGameOver:
 
 	}
@@ -133,7 +130,7 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	snake.Draw(screen, snake.X, snake.Y,
-		[]float32{0xf0 / float32(0xff), 0xc8 / float32(0xff), 0x00 / float32(0xff)})
+		[]float32{0x43 / float32(0xff), 0xff / float32(0xff), 0x64 / float32(0xff)})
 	for _, body := range snake.Bodies {
 		snake.Draw(screen, body.X, body.Y,
 			[]float32{0x43 / float32(0xff), 0xff / float32(0xff), 0x64 / float32(0xff)})
@@ -159,16 +156,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		Size:   fontSize,
 	}, op)
 
-	// var titleTexts string
-	// var texts string
-	// switch g.mode {
-	// case ModeTitle:
-	// 	titleTexts = "FLAPPY GOPHER"
-	// 	texts = "\n\n\n\n\n\nPRESS SPACE KEY\n\nOR A/B BUTTON\n\nOR TOUCH SCREEN"
-	// case ModeGameOver:
-	// 	texts = "\nGAME OVER!"
-	// }
-
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -181,8 +168,10 @@ func main() {
 	snake.Y = screenHeight / 2
 	snake.Size = headSize
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
-	ebiten.SetWindowTitle("Snake Game")
-	if err := ebiten.RunGame(&Game{}); err != nil {
+	ebiten.SetWindowTitle("Snake game")
+	if err := ebiten.RunGame(&Game{
+		speed: 5,
+	}); err != nil {
 		log.Fatal(err)
 	}
 }

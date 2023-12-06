@@ -1,8 +1,6 @@
 package models
 
 import (
-	"fmt"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
@@ -13,6 +11,7 @@ type Snake struct {
 	Y            int
 	Size         int
 	Bodies       []Body
+	Direction    string
 }
 
 type Body struct {
@@ -55,11 +54,36 @@ func (s *Snake) Draw(screen *ebiten.Image, x, y int, clr []float32) {
 }
 
 func (s *Snake) Grow() {
-	body := Body{
-		X: s.X,
-		Y: s.Y,
+	var body Body
+	// body := Body{
+	// 	X: s.X,
+	// 	Y: s.Y,
+	// }
+	for i := 1; i <= 3; i++ {
+		switch s.Direction {
+		case "up":
+			body = Body{
+				X: s.X,
+				Y: s.Y + i,
+			}
+		case "down":
+			body = Body{
+				X: s.X,
+				Y: s.Y - i,
+			}
+		case "left":
+			body = Body{
+				X: s.X + i,
+				Y: s.Y,
+			}
+		case "right":
+			body = Body{
+				X: s.X - i,
+				Y: s.Y,
+			}
+		}
+		s.Bodies = append(s.Bodies, body)
 	}
-	s.Bodies = append(s.Bodies, body)
 }
 
 func (s *Snake) MoveBody() {
@@ -83,8 +107,7 @@ func (s *Snake) IsHitFood(food *Food) bool {
 }
 
 func (s *Snake) BoardCollision(screenWidth, screenHeight int) bool {
-	if s.X-s.Size <= 0 || s.X+s.Size >= screenWidth || s.Y-s.Size <= 0 || s.Y+s.Size >= screenHeight {
-		fmt.Println("Game Over")
+	if s.X-s.Size/2 <= 0 || s.X+s.Size/2 >= screenWidth || s.Y-s.Size/2 <= 0 || s.Y+s.Size/2 >= screenHeight {
 		return true
 	}
 	return false
