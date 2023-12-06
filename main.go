@@ -16,21 +16,21 @@ import (
 type Mode int
 
 const (
-	ModeGame Mode = iota
+	ModeTitle Mode = iota
+	ModeGame
 	ModeGameOver
 
 	screenWidth   = 600
 	screenHeight  = 600
 	headSize      = 40
 	foodRadius    = 17
-	fontSize      = 34
+	fontSize      = 25
 	titleFontSize = fontSize * 1.5
 )
 
 var (
 	shakeMovementPositionX = 0
 	shakeMovementPositionY = 0
-	direction              = ""
 
 	simpleShader *ebiten.Shader
 	snake        = new(models.Snake)
@@ -68,8 +68,46 @@ func init() {
 
 }
 
+func (g *Game) init() {
+	// Reset snake
+	snake.SimpleShader = simpleShader
+	snake.X = screenWidth / 2
+	snake.Y = screenHeight / 2
+	snake.Size = headSize
+	snake.Bodies = []models.Body{}
+	snake.Direction = ""
+	shakeMovementPositionX = 0
+	shakeMovementPositionY = 0
+
+	// Reset foods
+	foods = []models.Food{}
+
+	// Reset score
+	g.score = 0
+}
+
+// Check if keys pressed and return what keys
+func (g *Game) isKeyPressed() (bool, []ebiten.Key) {
+	if len(inpututil.AppendPressedKeys(g.pressedKeys[:0])) > 0 {
+		return true, inpututil.AppendPressedKeys(g.pressedKeys[:0])
+	}
+	return false, []ebiten.Key{}
+}
+
 func (g *Game) Update() error {
 	switch g.mode {
+	case ModeTitle:
+		if ok, keys := g.isKeyPressed(); ok {
+			for _, key := range keys {
+				switch key.String() {
+				case "ArrowDown",
+					"ArrowUp",
+					"ArrowRight",
+					"ArrowLeft":
+					g.mode = ModeGame
+				}
+			}
+		}
 	case ModeGame:
 		if len(foods) < 1 {
 			food := models.NewFood(simpleShader, foodRadius, screenWidth, screenHeight)
@@ -84,39 +122,36 @@ func (g *Game) Update() error {
 			}
 		}
 
-		g.pressedKeys = inpututil.AppendPressedKeys(g.pressedKeys[:0])
+		_, g.pressedKeys = g.isKeyPressed()
 		for _, key := range g.pressedKeys {
 			switch key.String() {
 			case "ArrowDown":
-				if direction != "up" {
+				if snake.Direction != "up" {
 					shakeMovementPositionX = 0
 					shakeMovementPositionY = g.speed
-					direction = "down"
 					snake.Direction = "down"
 				}
 			case "ArrowUp":
-				if direction != "down" {
+				if snake.Direction != "down" {
 					shakeMovementPositionX = 0
 					shakeMovementPositionY = -g.speed
-					direction = "up"
 					snake.Direction = "up"
 				}
 			case "ArrowRight":
-				if direction != "left" {
+				if snake.Direction != "left" {
 					shakeMovementPositionX = g.speed
 					shakeMovementPositionY = 0
-					direction = "right"
 					snake.Direction = "right"
 				}
 			case "ArrowLeft":
-				if direction != "right" {
+				if snake.Direction != "right" {
 					shakeMovementPositionX = -g.speed
 					shakeMovementPositionY = 0
-					direction = "left"
 					snake.Direction = "left"
 				}
 			}
 		}
+
 		snake.MoveBody()
 		snake.X += shakeMovementPositionX
 		snake.Y += shakeMovementPositionY
@@ -128,31 +163,40 @@ func (g *Game) Update() error {
 			g.mode = ModeGameOver
 		}
 	case ModeGameOver:
-
+		if ok, _ := g.isKeyPressed(); ok {
+			g.init()
+			g.mode = ModeGame
+		}
 	}
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	snake.Draw(screen, snake.X, snake.Y,
-		[]float32{0x43 / float32(0xff), 0xff / float32(0xff), 0x64 / float32(0xff)})
-	for _, body := range snake.Bodies {
-		snake.Draw(screen, body.X, body.Y,
+	if g.mode != ModeTitle {
+		snake.Draw(screen, snake.X, snake.Y,
 			[]float32{0x43 / float32(0xff), 0xff / float32(0xff), 0x64 / float32(0xff)})
-	}
+		for _, body := range snake.Bodies {
+			snake.Draw(screen, body.X, body.Y,
+				[]float32{0x43 / float32(0xff), 0xff / float32(0xff), 0x64 / float32(0xff)})
+		}
 
-	for _, food := range foods {
-		food.DrawFood(screen)
+		for _, food := range foods {
+			food.DrawFood(screen)
+		}
 	}
-
+	var titleTexts string
 	var texts string
 	switch g.mode {
+	case ModeTitle:
+		titleTexts = "SNAKE"
+		texts = "\n\nUse arrow Up, Down, Left, Right\nTo start press any arrow"
 	case ModeGameOver:
-		texts = "\nGAME OVER!"
+		titleTexts = "GAME OVER!"
+		texts = "\n\nPress any key..."
 	}
 
 	op := &text.DrawOptions{}
-	op.GeoM.Translate(screenWidth, 0)
+	op.GeoM.Translate(screenWidth-20, 20)
 	op.ColorScale.ScaleWithColor(color.White)
 	op.LineSpacingInPixels = fontSize
 	op.PrimaryAlign = text.AlignEnd
@@ -162,13 +206,23 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}, op)
 
 	op = &text.DrawOptions{}
-	op.GeoM.Translate(screenWidth/2, 3*titleFontSize)
+	op.GeoM.Translate(screenWidth/2, screenHeight/2-titleFontSize/2)
+	op.ColorScale.ScaleWithColor(color.White)
+	op.LineSpacingInPixels = titleFontSize
+	op.PrimaryAlign = text.AlignCenter
+	text.Draw(screen, titleTexts, &text.GoTextFace{
+		Source: arcadeFaceSource,
+		Size:   titleFontSize,
+	}, op)
+
+	op = &text.DrawOptions{}
+	op.GeoM.Translate(screenWidth/2, screenHeight/2-titleFontSize/2)
 	op.ColorScale.ScaleWithColor(color.White)
 	op.LineSpacingInPixels = fontSize
 	op.PrimaryAlign = text.AlignCenter
 	text.Draw(screen, texts, &text.GoTextFace{
 		Source: arcadeFaceSource,
-		Size:   fontSize,
+		Size:   fontSize / 2,
 	}, op)
 
 }
