@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"image/color"
 	"log"
 
@@ -147,6 +148,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	op := &text.DrawOptions{}
+	op.GeoM.Translate(screenWidth, 0)
+	op.ColorScale.ScaleWithColor(color.White)
+	op.LineSpacingInPixels = fontSize
+	op.PrimaryAlign = text.AlignEnd
+	text.Draw(screen, fmt.Sprintf("score %03d", g.score), &text.GoTextFace{
+		Source: arcadeFaceSource,
+		Size:   fontSize / 2,
+	}, op)
+
+	op = &text.DrawOptions{}
 	op.GeoM.Translate(screenWidth/2, 3*titleFontSize)
 	op.ColorScale.ScaleWithColor(color.White)
 	op.LineSpacingInPixels = fontSize
@@ -168,7 +179,7 @@ func main() {
 	snake.Y = screenHeight / 2
 	snake.Size = headSize
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
-	ebiten.SetWindowTitle("Snake game")
+	ebiten.SetWindowTitle("Snake Game in Golang")
 	if err := ebiten.RunGame(&Game{
 		speed: 5,
 	}); err != nil {
